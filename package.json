@@ -1,0 +1,17 @@
+{
+  "name": "proxynode",
+  "version": "1.0.0",
+  "description": "to proxy your server",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "Harish",
+  "license": "ISC",
+  "dependencies": {
+    "@hapi/h2o2": "^8.3.0",
+    "@hapi/hapi": "^18.3.1",
+    "@hapi/inert": "^5.2.0",
+    "@hapi/wreck": "^15.0.1"
+  }
+}
