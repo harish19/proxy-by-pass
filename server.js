@@ -34,12 +34,14 @@ const init = async () => {
 		  		reqHeaders = req.headers;
 		  		delete reqHeaders.host;
 		  		console.log(reqHeaders);
-		  		if(req.method==='get'){
-		  			var res = await Wreck.get(url,{headers:{cookie:reqHeaders.cookie},'content-type': 'application/json'});
+		  		if(req.method==='get' || req.method==='OPTIONS' || req.method==='options'){
+		  			var res = await Wreck.get(url,{headers:{cookie:reqHeaders.cookie||""},'content-type': 'application/json'});
 		  		}else if(req.method==='post'){
-		  			var res = await Wreck.post( url, {payload:req.payload,headers:{cookie:reqHeaders.cookie},'content-type': 'application/json'});
+		  			var res = await Wreck.post( url, {payload:req.payload,headers:{cookie:reqHeaders.cookie||""},'content-type': 'application/json'});
+		  		}else if(req.method==='OPTIONS' || req.method==='options'){
+		  			var res = await Wreck.post( url, {payload:req.payload,headers:{cookie:reqHeaders.cookie||""},'content-type': 'application/json'});
 		  		}
-		  		let finalRes =  h.response(res.payload).header('set-cookie',res.res.headers['set-cookie']).header('content-type','application/json');
+		  		let finalRes =  h.response(res.payload).header('set-cookie',res.res.headers['set-cookie']).header('content-type','application/json').header('Access-Control-Allow-Origin','*');
 			    return finalRes;
 		  }
 		});
