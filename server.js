@@ -32,16 +32,34 @@ const init = async () => {
 		  handler: async function(req,h){
 		  		var url = remote + req.url.href.replace("http://localhost:3000", ''),
 		  		reqHeaders = req.headers;
+		  		let finalRes;
 		  		delete reqHeaders.host;
+		  		delete reqHeaders.referer;
+		  		delete reqHeaders.origin;
+		  		delete reqHeaders.pragma;
+		  		reqHeaders['cache-control'] = 'max-age=0';
+		  		reqHeaders['accept'] = 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3';
+		  		console.log('url------',url);
 		  		console.log(reqHeaders);
-		  		if(req.method==='get' || req.method==='OPTIONS' || req.method==='options'){
+		  		console.log('reqHeaders.cookie',req);
+		  		if(req.method==='get'){
 		  			var res = await Wreck.get(url,{headers:{cookie:reqHeaders.cookie||""},'content-type': 'application/json'});
+		  			console.log('res cookies-----',res.res.headers['set-cookie'])
+		  		 finalRes =  h.response(res.payload).header('set-cookie',res.res.headers['set-cookie']).header('content-type','application/json').header('Access-Control-Allow-Origin','*');
 		  		}else if(req.method==='post'){
 		  			var res = await Wreck.post( url, {payload:req.payload,headers:{cookie:reqHeaders.cookie||""},'content-type': 'application/json'});
+		  			console.log('res cookies-----',res.res.headers['set-cookie'])
+		  		 finalRes =  h.response(res.payload).header('set-cookie',res.res.headers['set-cookie']).header('content-type','application/json').header('Access-Control-Allow-Origin','*');
 		  		}else if(req.method==='OPTIONS' || req.method==='options'){
-		  			var res = await Wreck.post( url, {payload:req.payload,headers:{cookie:reqHeaders.cookie||""},'content-type': 'application/json'});
+		  			finalRes = h.response().header('Access-Control-Allow-Origin','*')
+		  									.header('Access-Control-Allow-Headers','cache-control,content-type')
+		  									.header('Access-Control-Allow-Method',req.method)
+		  									.header('Access-Control-Expose-Headers','access-control-allow-origin,access-control-allow-methods,access-control-allow-headers')
+		  									.header('Connection','keep-alive')
+		  									.header('Server','test')
+		  									.header('Transfer-Encoding','chunked');
 		  		}
-		  		let finalRes =  h.response(res.payload).header('set-cookie',res.res.headers['set-cookie']).header('content-type','application/json').header('Access-Control-Allow-Origin','*');
+		  		
 			    return finalRes;
 		  }
 		});
