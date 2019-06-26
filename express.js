@@ -36,6 +36,7 @@ app.get('*', async function(req, res){
 	delete reqHeaders.pragma;
 	delete reqHeaders['dom-cookie'];
 	reqHeaders.withCredentials=true;
+	reqHeaders.crossdomain=true;
 	// console.log(reqHeaders);
 	var response = await Wreck.get(url,reqHeaders);
 	res = setCookies(res,response.res.headers['set-cookie']);
@@ -46,23 +47,23 @@ app.post('*', async function(req, res){
 	var url = remote + req.url.replace("http://localhost:3000", ''),
 	reqHeaders = req.headers;
 	cookies = reqHeaders['dom-cookie'];
-	delete reqHeaders.host;
-	delete reqHeaders.referer;
-	delete reqHeaders.origin;
-	delete reqHeaders.pragma;
-	delete reqHeaders['dom-cookie'];
-	reqHeaders['Cookie'] = cookies;
-	// console.log(req.url+'----------post---------------------',reqHeaders);
-	// var response = await Wreck.post( url, {payload:req.body,headers:reqHeaders,'content-type': 'application/json'});
-	// console.log(JSON.parse(response.payload));
-	// res.json(JSON.parse(response.payload)); 
+	var payload = Object.keys(req.body).map(function(k) {
+				      return encodeURIComponent(k) + '=' + encodeURIComponent(req.body[k])
+				  }).join('&')
 	try{
-		var response= await axios({method: 'post',url: url,
-			// headers:reqHeaders
-			headers:{
-				         Cookie: cookies || ''
-				     }
-     , data: req.body});
+		var response= await axios({
+									method: 'post',
+									url: url,
+									headers:{
+								        Cookie: reqHeaders.cookie || cookies,
+								        "Content-Type": "application/x-www-form-urlencoded",
+									    "Cache-Control": "no-cache",
+									    "Postman-Token": "42e6c291-9a09-c29f-f28f-11872e2490a5"
+									},
+									withCredentials: true,
+						        	crossdomain: true
+						     		, data: payload
+						     	});
 		res = await setCookies(res,response.headers['set-cookie']);
 	    res.json(response.data); 
 	}catch(e){
